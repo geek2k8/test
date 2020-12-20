@@ -1,0 +1,5 @@
+rapidstake-qt usr/bin
+share/pixmaps/bitcoin32.xpm usr/share/pixmaps
+share/pixmaps/bitcoin80.xpm usr/share/pixmaps
+debian/rapidstake-qt.desktop usr/share/applications
+debian/rapidstake-qt.protocol usr/share/kde4/services/

@@ -1,0 +1,108 @@
+* update translations (ping tcatm on IRC for now)
+
+* update (commit) version in sources
+  rapidstake-qt.pro
+  src/version.h
+  share/setup.nsi
+  doc/README*
+
+* tag version in git
+
+   git tag -a v1.11.0
+
+* write release notes.  git shortlog helps a lot:
+
+   git shortlog --no-merges v1.11.0..
+
+* perform gitian builds
+
+  * From a directory containing the Rapidstake source, gitian-builder and gitian.sigs
+   export SIGNER=(your gitian key, ie bluematt, sipa, etc)
+   export VERSION=1.11.0
+   cd ./gitian-builder
+
+  * Fetch and build inputs:
+   mkdir -p inputs; cd inputs/
+   wget 'http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.9.tar.gz' -O miniupnpc-1.9.tar.gz
+   wget 'http://www.openssl.org/source/openssl-1.0.2d.tar.gz'
+   wget 'http://download.oracle.com/berkeley-db/db-6.2.32.tar.gz'
+   wget 'http://zlib.net/zlib-1.2.6.tar.gz'
+   wget 'ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.9.tar.gz'
+   wget 'http://fukuchi.org/works/qrencode/qrencode-3.2.0.tar.bz2'
+   wget 'https://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.bz2'
+   wget 'https://download.qt.io/archive/qt/5.11/5.11.0/single/qt-everywhere-src-5.11.0.tar.xz'
+   cd ..
+   ./bin/gbuild ../rapidstake/contrib/gitian-descriptors/boost-win32.yml
+   cp build/out/boost-win32-1.47.0-gitian.zip inputs/
+   ./bin/gbuild ../rapidstake/contrib/gitian-descriptors/qt-win32.yml
+   cp build/out/qt-win32-4.7.4-gitian.zip inputs/
+   ./bin/gbuild ../rapidstake/contrib/gitian-descriptors/deps-win32.yml
+   cp build/out/rapidstake-deps-0.0.3.zip inputs/
+
+  * Build rapidstaked and rapidstake-qt on Linux32, Linux64, and Win32:
+   ./bin/gbuild --commit rapidstake=v${VERSION} ../rapidstake/contrib/gitian-descriptors/gitian.yml
+   ./bin/gsign --signer $SIGNER --release ${VERSION} --destination ../gitian.sigs/ ../rapidstake/contrib/gitian-descriptors/gitian.yml
+   pushd build/out
+   zip -r rapidstake-${VERSION}-linux-gitian.zip *
+   mv rapidstake-${VERSION}-linux-gitian.zip ../../
+   popd
+   ./bin/gbuild --commit rapidstake=v${VERSION} ../rapidstake/contrib/gitian-descriptors/gitian-win32.yml
+   ./bin/gsign --signer $SIGNER --release ${VERSION}-win32 --destination ../gitian.sigs/ ../rapidstake/contrib/gitian-descriptors/gitian-win32.yml
+   pushd build/out
+   zip -r rapidstake-${VERSION}-win32-gitian.zip *
+   mv rapidstake-${VERSION}-win32-gitian.zip ../../
+   popd
+
+  Build output expected:
+  1. linux 32-bit and 64-bit binaries + source (rapidstake-${VERSION}-linux-gitian.zip)
+  2. windows 32-bit binary, installer + source (rapidstake-${VERSION}-win32-gitian.zip)
+  3. Gitian signatures (in gitian.sigs/${VERSION}[-win32]/(your gitian key)/
+
+* repackage gitian builds for release as stand-alone zip/tar/installer exe
+
+  * Linux .tar.gz:
+   unzip rapidstake-${VERSION}-linux-gitian.zip -d rapidstake-${VERSION}-linux
+   tar czvf rapidstake-${VERSION}-linux.tar.gz rapidstake-${VERSION}-linux
+   rm -rf rapidstake-${VERSION}-linux
+
+  * Windows .zip and setup.exe:
+   unzip rapidstake-${VERSION}-win32-gitian.zip -d rapidstake-${VERSION}-win32
+   mv rapidstake-${VERSION}-win32/rapidstake-*-setup.exe .
+   zip -r rapidstake-${VERSION}-win32.zip rapidstake-${VERSION}-win32
+   rm -rf rapidstake-${VERSION}-win32
+
+* perform Mac build
+  ///
+
+-------------------------------------------------------------------------
+
+* After 3 or more people have gitian-built, repackage gitian-signed zips:
+
+  * From a directory containing bitcoin source, gitian.sigs and gitian zips
+   export VERSION=1.11.0
+   mkdir Rapidstake-${VERSION}-linux-gitian
+   pushd Rapidstake-${VERSION}-linux-gitian
+   unzip ../Rapidstake-${VERSION}-linux-gitian.zip
+   mkdir gitian
+   cp ../Rapidstake/contrib/gitian-downloader/*.pgp ./gitian/
+   for signer in $(ls ../gitian.sigs/${VERSION}/); do
+     cp ../gitian.sigs/${VERSION}/${signer}/Rapidstake-build.assert ./gitian/${signer}-build.assert
+     cp ../gitian.sigs/${VERSION}/${signer}/Rapidstake-build.assert.sig ./gitian/${signer}-build.assert.sig
+   done
+   zip -r Rapidstake-${VERSION}-linux-gitian.zip *
+   cp Rapidstake-${VERSION}-linux-gitian.zip ../
+   popd
+   mkdir Rapidstake-${VERSION}-win32-gitian
+   pushd Rapidstake-${VERSION}-win32-gitian
+   unzip ../Rapidstake-${VERSION}-win32-gitian.zip
+   mkdir gitian
+   cp ../Rapidstake/contrib/gitian-downloader/*.pgp ./gitian/
+   for signer in $(ls ../gitian.sigs/${VERSION}-win32/); do
+     cp ../gitian.sigs/${VERSION}-win32/${signer}/Rapidstake-build.assert ./gitian/${signer}-build.assert
+     cp ../gitian.sigs/${VERSION}-win32/${signer}/Rapidstake-build.assert.sig ./gitian/${signer}-build.assert.sig
+   done
+   zip -r Rapidstake-${VERSION}-win32-gitian.zip *
+   cp Rapidstake-${VERSION}-win32-gitian.zip ../
+   popd
+
+  

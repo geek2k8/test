@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Rapidstake
+Comment=Rapidstake P2P Cryptocurrency
+Comment[fr]=Rapidstake, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Rapidstake, eşten eşe kriptografik sanal para birimi
+Comment[es]=Rapidstake, una criptomoneda P2P
+Exec=/usr/bin/rapidstake-qt
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/bitcoin80.xpm
+MimeType=x-scheme-handler/rapidstake;
+Categories=Office;

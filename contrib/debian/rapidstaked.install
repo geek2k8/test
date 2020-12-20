@@ -1,0 +1,2 @@
+debian/bin/rapidstaked usr/bin
+src/rapidstaked usr/lib/rapidstake

@@ -1,0 +1,34 @@
+src/*.exe
+src/Rapidstake
+src/Rapidstaked
+src/test_Rapidstake
+.*.swp
+*.*~*
+*.bak
+*.rej
+*.orig
+*.o
+*.patch
+.Rapidstake
+
+# Compilation and Qt preprocessor part
+*.qm
+Makefile
+Rapidstake-qt
+Rapidstake-qt.app
+
+# Unit-tests
+Makefile.test
+Rapidstake-qt_test
+
+# Resources cpp
+qrc_*.cpp
+
+# Qt creator
+*.pro.user
+
+# Mac specific
+.DS_Store
+build
+
+!src/leveldb-*/Makefile

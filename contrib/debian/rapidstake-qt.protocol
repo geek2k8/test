@@ -1,0 +1,11 @@
+[Protocol]
+exec=rapidstake-qt '%u'
+protocol=rapidstake
+input=none
+output=none
+helper=true
+listing=
+reading=false
+writing=false
+makedir=false
+deleting=false
